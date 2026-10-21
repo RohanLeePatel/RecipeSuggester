@@ -1,3 +1,6 @@
 <resources>
-    <string name="app_name">RecipeSuggester</string>
+    <string name="app_name">Smart Pantry Manager</string>
+    <string name="title_pantry">My Pantry</string>
+    <string name="pantry_empty_title">Your pantry is empty</string>
+    <string name="pantry_empty_message">Add the ingredients you have at home and we will show you recipes you can cook with them.</string>
 </resources>
