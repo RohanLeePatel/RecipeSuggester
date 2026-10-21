@@ -1,39 +1,107 @@
 package com.example.recipesuggester;
 
-import android.graphics.Color;
+import android.content.Intent;
+import android.database.SQLException;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
-import androidx.activity.SystemBarStyle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.appbar.MaterialToolbar;
+import com.example.recipesuggester.adapter.PantryAdapter;
+import com.example.recipesuggester.data.PantryDao;
+import com.example.recipesuggester.model.PantryItem;
+import com.example.recipesuggester.util.SystemBars;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.Snackbar;
 
-// Main screen. Right now it just shows the toolbar and the "pantry is empty"
-// message, the actual pantry list gets added later
-public class MainActivity extends AppCompatActivity {
+import java.util.List;
+
+// Pantry list screen (the first screen you see). shows everything in pantry_items
+// in a RecyclerView, + button to add, tap a card to edit, bin icon to delete
+public class MainActivity extends AppCompatActivity implements PantryAdapter.Listener {
+
+    private static final String TAG = "MainActivity";
+
+    private PantryDao pantryDao;
+    private PantryAdapter adapter;
+    private RecyclerView list;
+    private View emptyState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // dark() gives white status bar icons so they show up on the green toolbar
-        EdgeToEdge.enable(this, SystemBarStyle.dark(Color.TRANSPARENT));
+        SystemBars.enableEdgeToEdge(this);
         setContentView(R.layout.activity_main);
+        SystemBars.setUpToolbar(this, findViewById(R.id.main), findViewById(R.id.toolbar));
 
-        // use my toolbar from the layout as the action bar
-        MaterialToolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        pantryDao = new PantryDao(this);
 
-        // since the app draws behind the status bar and nav bar now, I have to add
-        // the padding myself otherwise the toolbar ends up under the status bar
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(bars.left, 0, bars.right, bars.bottom);
-            toolbar.setPadding(0, bars.top, 0, 0);
-            return insets;
-        });
+        list = findViewById(R.id.pantry_list);
+        emptyState = findViewById(R.id.empty_state);
+        adapter = new PantryAdapter(this);
+        list.setAdapter(adapter);
+
+        // explicit intent = I'm naming the exact activity to open.
+        // no extras means the form opens in "add" mode
+        findViewById(R.id.fab_add).setOnClickListener(v ->
+                startActivity(new Intent(this, AddEditIngredientActivity.class)));
+    }
+
+    // onResume runs every time this screen comes back to the front, including when the
+    // user finishes on the add/edit screen. so reloading here means the list always shows
+    // what's actually in the database, I don't need to pass results back
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadPantry();
+    }
+
+    private void loadPantry() {
+        // reading on the main thread is ok for a small pantry list, it would need
+        // a background thread if the table ever got really big
+        try {
+            List<PantryItem> items = pantryDao.getAll();
+            adapter.setItems(items);
+            // swap between the list and the "pantry is empty" message
+            boolean empty = items.isEmpty();
+            list.setVisibility(empty ? View.GONE : View.VISIBLE);
+            emptyState.setVisibility(empty ? View.VISIBLE : View.GONE);
+        } catch (SQLException e) {
+            Log.e(TAG, "loading pantry failed", e);
+            Toast.makeText(this, R.string.error_loading, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    // tapping a card opens the same form but in edit mode, by passing the item's id
+    @Override
+    public void onItemClick(PantryItem item) {
+        Intent intent = new Intent(this, AddEditIngredientActivity.class);
+        intent.putExtra(AddEditIngredientActivity.EXTRA_ITEM_ID, item.getId());
+        startActivity(intent);
+    }
+
+    // deleting can't be undone so ask first
+    @Override
+    public void onDeleteClick(PantryItem item) {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.delete_title)
+                .setMessage(getString(R.string.delete_message, item.getName()))
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.delete, (dialog, which) -> deleteItem(item))
+                .show();
+    }
+
+    private void deleteItem(PantryItem item) {
+        try {
+            pantryDao.delete(item.getId());
+            Snackbar.make(list, getString(R.string.deleted, item.getName()), Snackbar.LENGTH_SHORT).show();
+        } catch (SQLException e) {
+            Log.e(TAG, "deleting item " + item.getId() + " failed", e);
+            Toast.makeText(this, R.string.error_deleting, Toast.LENGTH_LONG).show();
+        }
+        loadPantry();
     }
 }

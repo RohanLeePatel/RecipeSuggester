@@ -8,7 +8,7 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <!-- toolbar. height is wrap_content because I add the status bar padding in MainActivity -->
+    <!-- toolbar. height is wrap_content because I add the status bar padding in code -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -18,30 +18,60 @@
         android:theme="@style/ThemeOverlay.Material3.Dark.ActionBar"
         app:title="@string/title_pantry" />
 
-    <!-- shows when there's nothing in the pantry -->
-    <LinearLayout
-        android:id="@+id/empty_state"
+    <!-- FrameLayout so the list, the empty message and the add button can sit on top of each other -->
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="32dp">
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/pantry_empty_title"
-            android:textAppearance="?attr/textAppearanceTitleLarge"
-            android:textColor="@color/text_primary" />
+        <!-- bottom padding + clipToPadding false so the last card can scroll up above the add button -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/pantry_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingStart="12dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="88dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/item_pantry" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+        <!-- shows when there's nothing in the pantry -->
+        <LinearLayout
+            android:id="@+id/empty_state"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:gravity="center"
-            android:text="@string/pantry_empty_message"
-            android:textAppearance="?attr/textAppearanceBodyLarge"
-            android:textColor="@color/text_secondary" />
-    </LinearLayout>
+            android:orientation="vertical"
+            android:padding="32dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/pantry_empty_title"
+                android:textAppearance="?attr/textAppearanceTitleLarge"
+                android:textColor="@color/text_primary" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="@string/pantry_empty_message"
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                android:textColor="@color/text_secondary" />
+        </LinearLayout>
+
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/fab_add"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            android:text="@string/add_ingredient"
+            app:icon="@drawable/ic_add" />
+    </FrameLayout>
 
 </LinearLayout>
