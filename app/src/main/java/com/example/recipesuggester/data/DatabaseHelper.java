@@ -16,7 +16,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "smart_pantry.db";
-    private static final int DATABASE_VERSION = 1;
+    // version 1 = just the empty tables, version 2 = recipes get seeded
+    private static final int DATABASE_VERSION = 2;
 
     // pantry table columns
     public static final String TABLE_PANTRY = "pantry_items";
@@ -89,23 +90,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.setForeignKeyConstraintsEnabled(true);
     }
 
-    // this only runs the first time the database gets created
+    // this only runs the first time the database gets created (first launch after install).
+    // seeding the recipes here is what stops them being added again on every launch
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_PANTRY);
         db.execSQL(CREATE_RECIPES);
         db.execSQL(CREATE_RECIPE_INGREDIENTS);
         db.execSQL(CREATE_RI_INDEX);
+        RecipeDao.insertSeedRecipes(db);
     }
 
-    // runs when DATABASE_VERSION goes up. since it's only version 1 I'm just dropping
-    // and remaking the tables (this would wipe the pantry though, so it would need a
-    // proper migration if I ever change the tables after people are using it)
+    // runs when DATABASE_VERSION goes up on a phone that already has the app.
+    // version 1 had empty recipe tables, so going to 2 just adds the recipes.
+    // I'm NOT dropping tables here anymore because that would wipe the user's pantry
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_RECIPE_INGREDIENTS);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_RECIPES);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_PANTRY);
-        onCreate(db);
+        if (oldVersion < 2) {
+            RecipeDao.insertSeedRecipes(db);
+        }
     }
 }
