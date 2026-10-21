@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- App palette: a fresh green for "food / pantry" with a warm orange accent. -->
+    <!-- app colours - green because it's about food, with an orange accent -->
     <color name="green_primary">#2E7D32</color>
     <color name="green_dark">#1B5E20</color>
     <color name="green_light">#C8E6C9</color>

@@ -12,26 +12,23 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.appbar.MaterialToolbar;
 
-/**
- * Launch screen of the app. For now it shows the toolbar and the empty pantry
- * message; the pantry list is added in a later stage.
- */
+// Main screen. Right now it just shows the toolbar and the "pantry is empty"
+// message, the actual pantry list gets added later
 public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Draw behind the system bars. The status bar sits on the green toolbar,
-        // so ask for light (white) status-bar icons.
+        // dark() gives white status bar icons so they show up on the green toolbar
         EdgeToEdge.enable(this, SystemBarStyle.dark(Color.TRANSPARENT));
         setContentView(R.layout.activity_main);
 
-        // Use the MaterialToolbar from the layout as this screen's action bar.
+        // use my toolbar from the layout as the action bar
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // The app draws behind the system bars (edge-to-edge), so push the
-        // toolbar below the status bar and keep content above the nav bar.
+        // since the app draws behind the status bar and nav bar now, I have to add
+        // the padding myself otherwise the toolbar ends up under the status bar
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(bars.left, 0, bars.right, bars.bottom);

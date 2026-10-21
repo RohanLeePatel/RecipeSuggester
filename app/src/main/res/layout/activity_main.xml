@@ -8,7 +8,7 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <!-- Top app bar. Height wraps so the status-bar padding added in code fits. -->
+    <!-- toolbar. height is wrap_content because I add the status bar padding in MainActivity -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -18,7 +18,7 @@
         android:theme="@style/ThemeOverlay.Material3.Dark.ActionBar"
         app:title="@string/title_pantry" />
 
-    <!-- Empty state shown while the pantry has no items. -->
+    <!-- shows when there's nothing in the pantry -->
     <LinearLayout
         android:id="@+id/empty_state"
         android:layout_width="match_parent"

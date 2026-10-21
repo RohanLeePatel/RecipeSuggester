@@ -1,5 +1,5 @@
 <resources>
-    <!-- One light theme for the whole app so every screen looks the same. -->
+    <!-- using the same light theme on every screen so it all looks consistent -->
     <style name="Base.Theme.RecipeSuggester" parent="Theme.Material3.Light.NoActionBar">
         <item name="colorPrimary">@color/green_primary</item>
         <item name="colorOnPrimary">@color/white</item>
