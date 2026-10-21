@@ -28,4 +28,18 @@
     <string name="saved">Ingredient saved</string>
     <string name="error_saving">Couldn\'t save the ingredient, please try again</string>
     <string name="item_not_found">That ingredient doesn\'t exist anymore</string>
+
+    <!-- suggested recipes + recipe detail -->
+    <string name="title_suggested">Suggested Recipes</string>
+    <string name="suggested_empty_title">No recipes match your pantry yet</string>
+    <string name="suggested_empty_message">Add more ingredients to your pantry to discover recipes you can cook right now.</string>
+    <plurals name="ingredient_count">
+        <item quantity="one">%d ingredient</item>
+        <item quantity="other">%d ingredients</item>
+    </plurals>
+    <string name="heading_ingredients">Ingredients</string>
+    <string name="heading_method">Method</string>
+    <string name="error_loading_recipes">Couldn\'t load the recipes</string>
+    <string name="recipe_not_found">That recipe couldn\'t be found</string>
+    <string name="recipe_no_longer_available">Your pantry no longer has everything for %1$s</string>
 </resources>

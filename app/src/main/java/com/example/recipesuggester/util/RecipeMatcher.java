@@ -22,7 +22,7 @@ import java.util.Map;
 //     can't be compared safely
 //  3. if anything is missing or short, the recipe isn't makeable
 //
-// it's plain Java with no Android or database code, so it can be unit tested on its own
+// it's plain Java with no Android or database code, so the screens just call it
 public class RecipeMatcher {
 
     // tiny allowance for decimal rounding, so 0.3 l still counts as 300 ml

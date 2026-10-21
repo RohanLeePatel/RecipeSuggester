@@ -8,7 +8,7 @@ import java.util.Locale;
 
 // checks what the user typed into the add/edit ingredient form.
 // each method returns an error message, or null if the value is fine.
-// it's plain Java (no Android stuff) so I can unit test it on my PC
+// it's plain Java (no Android stuff) so the form code stays short
 public class IngredientValidator {
 
     // the units the app supports. has to match the list in res/values/arrays.xml

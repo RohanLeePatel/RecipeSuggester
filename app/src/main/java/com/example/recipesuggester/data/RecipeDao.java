@@ -69,14 +69,6 @@ public class RecipeDao {
         }
     }
 
-    public int count() {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        try (Cursor c = db.rawQuery("SELECT COUNT(*) FROM " + DatabaseHelper.TABLE_RECIPES, null)) {
-            c.moveToFirst();
-            return c.getInt(0);
-        }
-    }
-
     // puts all the seed recipes into the database. this is static and takes the db because
     // it gets called from inside DatabaseHelper.onCreate/onUpgrade, which already run in a
     // transaction - so if anything fails halfway, NONE of the recipes get saved (no half-seeded db)

@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.database.SQLException;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -73,6 +75,22 @@ public class MainActivity extends AppCompatActivity implements PantryAdapter.Lis
             Log.e(TAG, "loading pantry failed", e);
             Toast.makeText(this, R.string.error_loading, Toast.LENGTH_LONG).show();
         }
+    }
+
+    // puts the recipes button in the toolbar (from res/menu/menu_main.xml)
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_recipes) {
+            startActivity(new Intent(this, SuggestedRecipesActivity.class));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     // tapping a card opens the same form but in edit mode, by passing the item's id
