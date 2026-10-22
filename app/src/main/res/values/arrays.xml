@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- units shown in the dropdown. has to match IngredientValidator.UNITS -->
+    <!-- units shown in the dropdown. same as IngredientValidator.UNITS except litres show as L
+         (the form lowercases it again before saving) -->
     <string-array name="units">
         <item>g</item>
         <item>kg</item>
         <item>ml</item>
-        <item>l</item>
+        <item>L</item>
         <item>pcs</item>
     </string-array>
 </resources>

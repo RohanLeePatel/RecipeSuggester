@@ -105,7 +105,7 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.ViewHolder
                 text = context.getResources().getQuantityString(R.plurals.pantry_expires_in_days, days, days);
             }
             holder.expiry.setText(text);
-            holder.expiry.setTextColor(ContextCompat.getColor(context, R.color.orange_accent));
+            holder.expiry.setTextColor(ContextCompat.getColor(context, R.color.expiring_orange));
             holder.expiry.setTypeface(null, Typeface.BOLD);
         }
     }

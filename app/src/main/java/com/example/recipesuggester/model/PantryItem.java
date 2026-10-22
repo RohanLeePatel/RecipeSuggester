@@ -1,5 +1,7 @@
 package com.example.recipesuggester.model;
 
+import com.example.recipesuggester.util.Units;
+
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -43,7 +45,7 @@ public class PantryItem {
 
     // e.g. "250 g" or "3 pcs"
     public String getQuantityText() {
-        return formatQuantity(quantity) + " " + unit;
+        return formatQuantity(quantity) + " " + Units.display(unit);
     }
 
     // how many days until this item expires: 0 = today, 1 = tomorrow, negative = already expired.

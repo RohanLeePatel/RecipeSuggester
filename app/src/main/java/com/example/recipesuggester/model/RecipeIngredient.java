@@ -1,5 +1,7 @@
 package com.example.recipesuggester.model;
 
+import com.example.recipesuggester.util.Units;
+
 // one ingredient that a recipe needs, e.g. 200 g flour (one row in recipe_ingredients)
 public class RecipeIngredient {
 
@@ -20,6 +22,6 @@ public class RecipeIngredient {
     // e.g. "200 g flour"
     @Override
     public String toString() {
-        return PantryItem.formatQuantity(quantity) + " " + unit + " " + name;
+        return PantryItem.formatQuantity(quantity) + " " + Units.display(unit) + " " + name;
     }
 }

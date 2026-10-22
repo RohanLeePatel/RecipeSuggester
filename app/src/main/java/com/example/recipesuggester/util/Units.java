@@ -30,6 +30,12 @@ public class Units {
         }
     }
 
+    // how a unit is shown on screen. litres are stored as "l" but a lowercase l looks
+    // like the number 1 ("1 l"), so it gets shown as "L" instead
+    public static String display(String unit) {
+        return "l".equals(unit) ? "L" : unit;
+    }
+
     // converts an amount to its group's base unit, e.g. 1.5 kg -> 1500 (g), 2 l -> 2000 (ml).
     // only call this with units where groupOf() isn't null
     public static double toBase(double quantity, String unit) {

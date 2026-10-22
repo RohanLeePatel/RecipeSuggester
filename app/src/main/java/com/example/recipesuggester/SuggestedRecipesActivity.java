@@ -5,6 +5,7 @@ import android.database.SQLException;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.recipesuggester.adapter.RecipeAdapter;
 import com.example.recipesuggester.data.PantryDao;
 import com.example.recipesuggester.data.RecipeDao;
+import com.example.recipesuggester.model.PantryItem;
 import com.example.recipesuggester.model.Recipe;
 import com.example.recipesuggester.util.RecipeMatcher;
 import com.example.recipesuggester.util.SystemBars;
@@ -30,6 +32,7 @@ public class SuggestedRecipesActivity extends AppCompatActivity implements Recip
     private RecipeAdapter adapter;
     private RecyclerView list;
     private View emptyState;
+    private TextView emptyTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +47,7 @@ public class SuggestedRecipesActivity extends AppCompatActivity implements Recip
 
         list = findViewById(R.id.recipe_list);
         emptyState = findViewById(R.id.empty_state);
+        emptyTitle = findViewById(R.id.empty_title);
         adapter = new RecipeAdapter(this);
         list.setAdapter(adapter);
     }
@@ -59,12 +63,20 @@ public class SuggestedRecipesActivity extends AppCompatActivity implements Recip
     private void loadSuggestions() {
         try {
             // fresh from the database every time, nothing cached
-            RecipeMatcher matcher = new RecipeMatcher(pantryDao.getAll());
+            List<PantryItem> pantry = pantryDao.getAll();
+            RecipeMatcher matcher = new RecipeMatcher(pantry);
             List<Recipe> makeable = matcher.findMakeable(recipeDao.getAll());
             adapter.setRecipes(makeable);
             boolean empty = makeable.isEmpty();
             list.setVisibility(empty ? View.GONE : View.VISIBLE);
             emptyState.setVisibility(empty ? View.VISIBLE : View.GONE);
+
+            // a different message if the pantry itself is empty, because "no recipes match"
+            // doesn't make much sense when there's nothing to match against
+            if (empty) {
+                emptyTitle.setText(pantry.isEmpty()
+                        ? R.string.suggested_empty_pantry_title : R.string.suggested_empty_title);
+            }
         } catch (SQLException e) {
             Log.e(TAG, "loading suggestions failed", e);
             Toast.makeText(this, R.string.error_loading_recipes, Toast.LENGTH_LONG).show();

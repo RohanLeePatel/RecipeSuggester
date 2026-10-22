@@ -15,8 +15,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.recipesuggester.data.PantryDao;
 import com.example.recipesuggester.model.PantryItem;
+import com.example.recipesuggester.util.IngredientNames;
 import com.example.recipesuggester.util.IngredientValidator;
 import com.example.recipesuggester.util.SystemBars;
+import com.example.recipesuggester.util.Units;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputLayout;
@@ -95,7 +97,7 @@ public class AddEditIngredientActivity extends AppCompatActivity {
         }
         nameInput.setText(item.getName());
         quantityInput.setText(PantryItem.formatQuantity(item.getQuantity()));
-        unitInput.setText(item.getUnit(), false); // false = don't pop the dropdown open
+        unitInput.setText(Units.display(item.getUnit()), false); // false = don't pop the dropdown open
         expiryInput.setText(item.getExpiryDate() == null ? "" : item.getExpiryDate());
         return true;
     }
@@ -118,11 +120,15 @@ public class AddEditIngredientActivity extends AppCompatActivity {
     private void save() {
         String name = nameInput.getText().toString().trim();
         String quantityText = quantityInput.getText().toString();
-        String unit = unitInput.getText().toString();
+        // lowercase because the dropdown shows litres as "L" but it's saved as "l"
+        String unit = unitInput.getText().toString().trim().toLowerCase(Locale.ROOT);
         String expiry = expiryInput.getText().toString();
 
         // check every field so the user sees all the problems at once, not one at a time
         String nameError = IngredientValidator.validateName(name);
+        if (nameError == null && isAlreadyInPantry(name)) {
+            nameError = getString(R.string.error_duplicate_name, name);
+        }
         String quantityError = IngredientValidator.validateQuantity(quantityText);
         String unitError = IngredientValidator.validateUnit(unit);
         String expiryError = IngredientValidator.validateExpiryDate(expiry);
@@ -158,6 +164,19 @@ public class AddEditIngredientActivity extends AppCompatActivity {
         Toast.makeText(this, R.string.saved, Toast.LENGTH_SHORT).show();
         // finishing goes back to MainActivity, which reloads the list in onResume
         finish();
+    }
+
+    // stops the same ingredient being added twice (e.g. "Eggs" when "egg" is already there),
+    // which would show two cards for one thing. uses the same name normalizing as the matching.
+    // the item being edited is skipped, otherwise it would clash with itself
+    private boolean isAlreadyInPantry(String name) {
+        String normalized = IngredientNames.normalize(name);
+        for (PantryItem existing : pantryDao.getAll()) {
+            if (existing.getId() != itemId && IngredientNames.normalize(existing.getName()).equals(normalized)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // only show "Clear date" when there's actually a date to clear
