@@ -5,6 +5,7 @@
     <color name="green_dark">#1B5E20</color>
     <color name="green_light">#C8E6C9</color>
     <color name="orange_accent">#EF6C00</color>
+    <color name="expired_red">#C62828</color>
     <color name="background">#F6F8F5</color>
     <color name="text_primary">#1C1C1C</color>
     <color name="text_secondary">#5F6368</color>

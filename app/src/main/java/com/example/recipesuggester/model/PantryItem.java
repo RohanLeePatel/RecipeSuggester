@@ -1,6 +1,10 @@
 package com.example.recipesuggester.model;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 // one ingredient in the user's pantry (one row in the pantry_items table)
 public class PantryItem {
@@ -40,5 +44,33 @@ public class PantryItem {
     // e.g. "250 g" or "3 pcs"
     public String getQuantityText() {
         return formatQuantity(quantity) + " " + unit;
+    }
+
+    // how many days until this item expires: 0 = today, 1 = tomorrow, negative = already expired.
+    // returns null if there's no expiry date (or it can't be read).
+    // using Calendar instead of java.time because java.time needs Android 8 and my minSdk is 24 (Android 7)
+    public Integer daysUntilExpiry() {
+        if (expiryDate == null) {
+            return null;
+        }
+        try {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            format.setLenient(false);
+            Calendar expiry = Calendar.getInstance();
+            expiry.setTime(format.parse(expiryDate)); // parse gives midnight of that day
+
+            // today at midnight, so the time of day doesn't change the answer
+            Calendar today = Calendar.getInstance();
+            today.set(Calendar.HOUR_OF_DAY, 0);
+            today.set(Calendar.MINUTE, 0);
+            today.set(Calendar.SECOND, 0);
+            today.set(Calendar.MILLISECOND, 0);
+
+            long millisPerDay = 24L * 60 * 60 * 1000;
+            // Math.round because a daylight saving day is 23 or 25 hours long
+            return (int) Math.round((expiry.getTimeInMillis() - today.getTimeInMillis()) / (double) millisPerDay);
+        } catch (ParseException e) {
+            return null;
+        }
     }
 }

@@ -1,5 +1,7 @@
 package com.example.recipesuggester.adapter;
 
+import android.content.Context;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,6 +9,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.recipesuggester.R;
@@ -29,14 +32,20 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.ViewHolder
     private final List<PantryItem> items = new ArrayList<>();
     private final Listener listener;
 
+    // from the settings screen
+    private boolean expiryAlertsOn;
+    private int warningDays;
+
     public PantryAdapter(Listener listener) {
         this.listener = listener;
     }
 
-    // swaps in the latest list from the database and redraws
-    public void setItems(List<PantryItem> newItems) {
+    // swaps in the latest list from the database (and the current expiry settings) and redraws
+    public void setItems(List<PantryItem> newItems, boolean expiryAlertsOn, int warningDays) {
         items.clear();
         items.addAll(newItems);
+        this.expiryAlertsOn = expiryAlertsOn;
+        this.warningDays = warningDays;
         notifyDataSetChanged();
     }
 
@@ -54,19 +63,51 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.ViewHolder
         holder.name.setText(item.getName());
         holder.quantity.setText(item.getQuantityText());
 
-        // only show the expiry line if the item actually has a date
-        if (item.getExpiryDate() != null) {
-            holder.expiry.setText(holder.itemView.getContext()
-                    .getString(R.string.pantry_expires, item.getExpiryDate()));
-            holder.expiry.setVisibility(View.VISIBLE);
-        } else {
-            holder.expiry.setVisibility(View.GONE);
-        }
+        showExpiry(holder, item);
 
         holder.itemView.setOnClickListener(v -> listener.onItemClick(item));
         holder.delete.setOnClickListener(v -> listener.onDeleteClick(item));
         holder.delete.setContentDescription(holder.itemView.getContext()
                 .getString(R.string.delete_item, item.getName()));
+    }
+
+    // the expiry line on the card. with alerts off it's just grey text with the date.
+    // with alerts on, expired items go red and items expiring within warningDays go orange
+    private void showExpiry(ViewHolder holder, PantryItem item) {
+        Context context = holder.itemView.getContext();
+        Integer days = item.daysUntilExpiry();
+        if (days == null) {
+            holder.expiry.setVisibility(View.GONE); // no date set
+            return;
+        }
+        holder.expiry.setVisibility(View.VISIBLE);
+
+        // reset first because RecyclerView reuses cards, otherwise a reused card
+        // could keep the red colour from a different item
+        holder.expiry.setTextColor(ContextCompat.getColor(context, R.color.text_secondary));
+        holder.expiry.setTypeface(null, Typeface.NORMAL);
+        holder.expiry.setText(context.getString(R.string.pantry_expires, item.getExpiryDate()));
+
+        if (!expiryAlertsOn) {
+            return;
+        }
+        if (days < 0) {
+            holder.expiry.setText(context.getString(R.string.pantry_expired, item.getExpiryDate()));
+            holder.expiry.setTextColor(ContextCompat.getColor(context, R.color.expired_red));
+            holder.expiry.setTypeface(null, Typeface.BOLD);
+        } else if (days <= warningDays) {
+            String text;
+            if (days == 0) {
+                text = context.getString(R.string.pantry_expires_today);
+            } else if (days == 1) {
+                text = context.getString(R.string.pantry_expires_tomorrow);
+            } else {
+                text = context.getResources().getQuantityString(R.plurals.pantry_expires_in_days, days, days);
+            }
+            holder.expiry.setText(text);
+            holder.expiry.setTextColor(ContextCompat.getColor(context, R.color.orange_accent));
+            holder.expiry.setTypeface(null, Typeface.BOLD);
+        }
     }
 
     @Override

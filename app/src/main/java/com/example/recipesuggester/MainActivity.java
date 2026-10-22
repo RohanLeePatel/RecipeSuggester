@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.recipesuggester.adapter.PantryAdapter;
 import com.example.recipesuggester.data.PantryDao;
 import com.example.recipesuggester.model.PantryItem;
+import com.example.recipesuggester.util.Settings;
 import com.example.recipesuggester.util.SystemBars;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
@@ -28,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements PantryAdapter.Lis
     private static final String TAG = "MainActivity";
 
     private PantryDao pantryDao;
+    private Settings settings;
     private PantryAdapter adapter;
     private RecyclerView list;
     private View emptyState;
@@ -40,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements PantryAdapter.Lis
         SystemBars.setUpToolbar(this, findViewById(R.id.main), findViewById(R.id.toolbar));
 
         pantryDao = new PantryDao(this);
+        settings = new Settings(this);
 
         list = findViewById(R.id.pantry_list);
         emptyState = findViewById(R.id.empty_state);
@@ -66,7 +69,9 @@ public class MainActivity extends AppCompatActivity implements PantryAdapter.Lis
         // a background thread if the table ever got really big
         try {
             List<PantryItem> items = pantryDao.getAll();
-            adapter.setItems(items);
+            // settings get read here too, so changing them on the settings screen
+            // shows up as soon as the user comes back
+            adapter.setItems(items, settings.isExpiryAlertsOn(), settings.getWarningDays());
             // swap between the list and the "pantry is empty" message
             boolean empty = items.isEmpty();
             list.setVisibility(empty ? View.GONE : View.VISIBLE);
@@ -77,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements PantryAdapter.Lis
         }
     }
 
-    // puts the recipes button in the toolbar (from res/menu/menu_main.xml)
+    // puts the recipes and settings buttons in the toolbar (from res/menu/menu_main.xml)
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -88,6 +93,10 @@ public class MainActivity extends AppCompatActivity implements PantryAdapter.Lis
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_recipes) {
             startActivity(new Intent(this, SuggestedRecipesActivity.class));
+            return true;
+        }
+        if (item.getItemId() == R.id.action_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
             return true;
         }
         return super.onOptionsItemSelected(item);
